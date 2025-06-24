@@ -17,6 +17,7 @@ from Arrow.Tool.asm_libraries.event_trigger.event_trigger import EventTrigger as
 from Arrow.Tool.asm_libraries.barrier.barrier import Barrier as Barrier_wrapper
 from Arrow.Tool.state_management.switch_state import SwitchState as SwitchState_wrapper
 from Arrow.Tool.asm_libraries.switch_el import switch_EL as switch_EL_wrapper
+from Arrow.Tool.asm_libraries.trickbox.trickbox import Trickbox as Trickbox_wrapper
 
 class AR:
     logger = get_logger()
@@ -125,6 +126,19 @@ class AR:
     def store_value_into_register(register: Register, value: int) -> None:
         # Calls the internal store_value yet expose to users as TG.store_value API
         return store_value.store_value_into_register(register, value)
+
+    @staticmethod
+    class Trickbox:
+        @staticmethod
+        def write(field: str, value: Optional[int] = None, register: Optional[Register] = None):
+            trickbox = Trickbox_wrapper()
+            return trickbox.write(field, value, register)
+
+        @staticmethod
+        def read(field: str, register: Register):
+            trickbox = Trickbox_wrapper()
+            return trickbox.read(field, register)
+
 
     @staticmethod
     class Stack:

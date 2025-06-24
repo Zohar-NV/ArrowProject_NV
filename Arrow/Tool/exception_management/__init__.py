@@ -286,3 +286,71 @@ def populate_callback_handler(page_table:PageTable):
             AsmLogger.asm(f"br x1")
 
     return callback_handler_code, skipping_callback_memory
+
+
+
+
+def populate_fiq_handler(page_table:PageTable):
+
+    fiq_handler_code = None
+    with SwitchPageTable(page_table):
+        segment_manager = page_table.segment_manager
+        fiq_handler_code = segment_manager.allocate_memory_segment(name=f"fiq_handler_code_{page_table.page_table_name}",
+                                                                    byte_size=0x800,
+                                                                    memory_type=Configuration.Memory_types.CODE, 
+                                                                    alignment_bits=8,
+                                                                    exclusive_segment=True) 
+
+        fiq_handler_code_label = Label(postfix="fiq_handler_code_label")
+        with SwitchCode(fiq_handler_code):
+            AsmLogger.comment(f"------- fiq hander for {page_table.page_table_name} -------")
+            AsmLogger.asm(f"{fiq_handler_code_label}:")
+            AsmLogger.asm(f"nop")
+
+
+            AsmLogger.comment(f"Save x0 and x1 to the stack")
+            # TODO:: fault with ESR 0x96000045 when access the stack, need to fix it. 
+            #AsmLogger.asm(f"stp x0, x1, [sp, #-16]!", comment="Pre-decrement the stack pointer and store x0, x1")
+
+
+            AsmLogger.comment(f"Read Interrupt ID")
+            AsmLogger.asm(f"mrs x8, s3_0_c12_c8_0", comment="ICC_IAR0_EL1")
+
+            AsmLogger.comment(f"check special INTID")
+            AsmLogger.asm(f"ldr x6, =0x3fc", comment="0x3fc")
+            AsmLogger.asm(f"cmp x8, x6", comment="compare x8 with 0x3fc")
+            AsmLogger.asm(f"beq ack_group1", comment="branch to ack_group1 if x8 is 0x3fc")
+            AsmLogger.asm(f"ldr x6, =0x3fd", comment="0x3fd")
+            AsmLogger.asm(f"cmp x8, x6", comment="compare x8 with 0x3fd")
+            AsmLogger.asm(f"beq ack_group1", comment="branch to ack_group1 if x8 is 0x3fd")
+            AsmLogger.asm(f"ldr x6, =0x3ff", comment="0x3ff")
+            AsmLogger.asm(f"cmp x8, x6", comment="compare x8 with 0x3ff")
+            AsmLogger.asm(f"beq ack_group1", comment="branch to ack_group1 if x8 is 0x3ff")
+
+            AsmLogger.comment(f"Set End-Of-Interrupt")
+            AsmLogger.asm(f"msr s3_0_c12_c8_1,x8", comment="ICC_EOIR0_EL1")
+            AsmLogger.asm(f"bl unmask_interrupts", comment="unmask_interrupts")
+
+
+            label_ack_group1 = Label(postfix="ack_group1")
+            AsmLogger.asm(f"{label_ack_group1}:")
+            AsmLogger.comment(f"Read Interrupt ID")
+            AsmLogger.asm(f"mrs x8, s3_0_c12_c12_0", comment="ICC_IAR1_EL1")
+            AsmLogger.asm(f"msr s3_0_c12_c12_1,x8", comment="ICC_EOIR1_EL1")
+            AsmLogger.asm(f"bl unmask_interrupts", comment="unmask_interrupts")
+
+            # AsmLogger.comment(f"Unmask Interrupts")
+            # AsmLogger.asm(f"mrs x8,daif", comment="Read DAIF register")
+            # AsmLogger.asm(f"mov x6 , #0x380", comment="0x380")
+            # AsmLogger.asm(f"and x8, x8, x6", comment="DAIF_IRQ_MASK")
+            # AsmLogger.asm(f"mov x6 , #0x340", comment="0x340")
+            # AsmLogger.asm(f"and x8, x8, x6", comment="DAIF_FIQ_MASK")
+
+            AsmLogger.comment(f"Restore link register")
+            AsmLogger.asm(f"msr DAIFclr,#3", comment="DAIFclr,#3")
+
+            AsmLogger.asm(f"mov x30, x9", comment="Restore link register")
+            AsmLogger.asm(f"br x30", comment="Branch to the link register")
+
+
+    return fiq_handler_code, None

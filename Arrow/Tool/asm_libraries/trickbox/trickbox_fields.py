@@ -1,0 +1,114 @@
+from enum import Enum
+
+class TrickboxField(Enum):
+    """
+    Enumeration of Trickbox fields with their offsets from base address 0x13000000
+    """
+    # Base address fields
+    TUBE = 0x0000
+    CONFIGURATION = 0x0004
+    SCHEDULE_FIQ = 0x0008
+    SCHEDULE_IRQ = 0x000C
+    CLEAR_FIQ = 0x0010
+    CLEAR_IRQ = 0x0014
+    SCHEDULE_RST = 0x0018
+    EXTENDED_CONFIGURATION = 0x0028
+    ABORTRGNLO2 = 0x0038
+    ABORTRGNHI2 = 0x003C
+    ABORTRGNLO1 = 0x0040
+    ABORTRGNHI1 = 0x0044
+    DBG_CONTROL = 0x0054
+    DBG_PE_MAILBOX = 0x0068
+    DORMANT_CONTROL = 0x00A4
+    CORE_GENERATED_IRQ_PIN_VALUE = 0x00B0
+    EXTENDED_TARGET_CPU = 0x00F0
+    TARGET_CPU = 0x00FC
+    ABORT_RGN64_LO1 = 0x0100
+    ABORT_RGN64_LO1_HI = 0x0104
+    ABORT_RGN64_HI1 = 0x0108
+    ABORT_RGN64_HI1_HI = 0x010C
+    ABORT_RGN64_LO2 = 0x0110
+    ABORT_RGN64_LO2_HI = 0x0114
+    ABORT_RGN64_HI2 = 0x0118
+    ABORT_RGN64_HI2_HI = 0x011C
+    PPU0_ADDR = 0x0230
+    PPU0_MASK = 0x0234
+    PPU1_ADDR = 0x0238
+    PPU1_MASK = 0x023C
+    PPU2_ADDR = 0x0240
+    PPU2_MASK = 0x0244
+    PPU3_ADDR = 0x0248
+    PPU3_MASK = 0x024C
+    PPU4_ADDR = 0x0250
+    PPU4_MASK = 0x0254
+    PPU5_ADDR = 0x0258
+    PPU5_MASK = 0x025C
+    WATCH_DOG = 0x0284
+    AXI_ABORT_CTL = 0x0500
+    SW_RESET_CTL = 0x0520
+    GTE_API = 0x0A00
+    GTE_API_PARAM = 0x0A04
+    GTE_API_STATUS = 0x0A08
+    GTE_API_STATUS_64 = 0x0A20
+    GTE_API_STATUS_64_HI = 0x0A24
+    GTE_API_PARAM_64 = 0x0A28
+    GTE_API_PARAM_64_HI = 0x0A2C
+    SPI_PIN_INDEX = 0x0C00
+    SPI_PIN_VALUE = 0x0C04
+    PPI_TARGET_CORE = 0x0C20
+    PPI_INTR_VALUE = 0x0C24
+    PPI_INTR_CONFIG = 0x0C2C
+    REI_TARGET_CORE = 0x0C40
+    REI_VALUE = 0x0C44
+    SEI_TARGET_CORE = 0x0C60
+    SEI_VALUE = 0x0C64
+    SPI_PPI_SEI_REI_CONTROL = 0x0C80
+    GICRD_EVENT_STATUS_INDEX = 0x0CA0
+    GICRD_EVENT_STATUS_VALUE = 0x0CA4
+    DEVICE_ID = 0x0D00
+    ATTRIBUTES = 0x0D10
+    ADDRESS = 0x0D20
+    DATA = 0x0D40
+    OPERATE = 0x0D80
+    TEST_TO_BFM_CTRL_REG = 0x0D88
+    BFM_TO_TEST_CTRL_REGS = 0x0D90
+    EO_RETURN_MAILBOX = 0xE000
+    SCRATCH_PAD = 0x1080
+    SCHEDULE_SERROR = 0x1100
+    CLEAR_SERROR = 0x1104
+    SYSTEM_PIN_VALUE = 0x1110
+    WRITE_UBI = 0xF000
+    READ_UBI = 0xF008
+    READ_UBI_DATA = 0xF010
+    TBX_RAS_PIN_VALUE = 0xF100
+    TBX_START_OF_TEST = 0xF610
+    PM_EXIT_DRIVER = 0xF600
+    WARM_RESET = 0xF620
+
+    def __str__(self):
+        return self.name
+
+    @classmethod
+    def get_offset(cls, field_name: str) -> int:
+        """
+        Get the offset for a given field name.
+        
+        Args:
+            field_name (str): The name of the field (case insensitive)
+            
+        Returns:
+            int: The offset value
+            
+        Raises:
+            ValueError: If the field name is not found
+        """
+        field_name_upper = field_name.upper()
+        for field in cls:
+            if field.name == field_name_upper:
+                return field.value
+        raise ValueError(f"Trickbox field '{field_name}' not found")
+
+    @classmethod
+    def list_fields(cls):
+        """Return a list of all available field names."""
+        return [field.name for field in cls] 
