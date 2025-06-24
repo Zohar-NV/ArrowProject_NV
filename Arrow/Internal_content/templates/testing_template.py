@@ -4,7 +4,9 @@ from Arrow.Utils.configuration_management import Configuration
 from Arrow.Arrow_API.resources.memory_manager import MemoryManager_API as MemoryManager
 from Arrow.Arrow_API.resources.register_manager import RegisterManager_API as RegisterManager
 
-
+# TODO:: work on Power related content
+# TODO:: work on TRBE trace content + knobs
+# TODO:: add StartingEL knob. 
 # TODO:: refactor SwitchState to have with scope, and the ability to switch to any EL level.
    # TODO:: rename "State" into "PE"
 # TODO:: repalce Memory.cross_core with Memory.cross_page_table 
@@ -15,13 +17,24 @@ from Arrow.Arrow_API.resources.register_manager import RegisterManager_API as Re
 
 
 
-Configuration.Knobs.Config.core_count.set_value(2)
-Configuration.Knobs.Template.scenario_count.set_value(2)
+Configuration.Knobs.Config.core_count.set_value(1)
+Configuration.Knobs.Template.scenario_count.set_value(1)
 
 
 #Configuration.Knobs.Template.scenario_query.set_value({"simple_cache_scenario":100, "WFIT_CROSS_SPE_scenario": 0, Configuration.Tag.REST: 1})
-Configuration.Knobs.Template.scenario_query.set_value({"random_instructions": 100, Configuration.Tag.REST: 1})
+Configuration.Knobs.Template.scenario_query.set_value({"enter_tc1_scenario": 100})
 #Configuration.Knobs.Template.scenario_query.set_value({"basic_false_sharing_scenario": 50, "ldstcc_release_rar_check": 50, Configuration.Tag.REST: 1})
+
+
+
+@AR.scenario_decorator(random=True, )
+def enter_tc1_scenario():
+
+    AR.comment("entering TC1")
+    AR.Trickbox.write(field="TARGET_CPU", value=0x1)
+    AR.Trickbox.write(field="SCHEDULE_FIQ", value=0x105)
+
+    #AR.asm("wfi")
 
 
 @AR.scenario_decorator(random=True, )
