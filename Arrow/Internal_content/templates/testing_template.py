@@ -31,8 +31,8 @@ Configuration.Knobs.Template.scenario_query.set_value({"enter_tc1_scenario": 100
 def enter_tc1_scenario():
 
     AR.comment("entering TC1")
-    AR.Trickbox.write(field="TARGET_CPU", value=0x1)
-    AR.Trickbox.write(field="SCHEDULE_FIQ", value=0x105)
+    AR.Trickbox.write(field=Configuration.TrickboxField.TARGET_CPU, value=0x1)
+    AR.Trickbox.write(field=Configuration.TrickboxField.SCHEDULE_FIQ, value=0x105)
 
     #AR.asm("wfi")
 

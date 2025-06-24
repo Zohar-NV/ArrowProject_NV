@@ -130,12 +130,12 @@ class AR:
     @staticmethod
     class Trickbox:
         @staticmethod
-        def write(field: str, value: Optional[int] = None, register: Optional[Register] = None):
+        def write(field: Configuration.TrickboxField, value: Optional[int] = None, register: Optional[Register] = None):
             trickbox = Trickbox_wrapper()
             return trickbox.write(field, value, register)
 
         @staticmethod
-        def read(field: str, register: Register):
+        def read(field: Configuration.TrickboxField, register: Register):
             trickbox = Trickbox_wrapper()
             return trickbox.read(field, register)
 

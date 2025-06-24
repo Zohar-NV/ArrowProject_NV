@@ -87,28 +87,3 @@ class TrickboxField(Enum):
 
     def __str__(self):
         return self.name
-
-    @classmethod
-    def get_offset(cls, field_name: str) -> int:
-        """
-        Get the offset for a given field name.
-        
-        Args:
-            field_name (str): The name of the field (case insensitive)
-            
-        Returns:
-            int: The offset value
-            
-        Raises:
-            ValueError: If the field name is not found
-        """
-        field_name_upper = field_name.upper()
-        for field in cls:
-            if field.name == field_name_upper:
-                return field.value
-        raise ValueError(f"Trickbox field '{field_name}' not found")
-
-    @classmethod
-    def list_fields(cls):
-        """Return a list of all available field names."""
-        return [field.name for field in cls] 
