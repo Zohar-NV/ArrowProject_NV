@@ -54,25 +54,47 @@ def do_boot():
         if not skip_boot:
             enable_page_tables()
             enable_exception_tables()
+            set_privilege_level()
             #generate(instruction_count=10)
             logger.debug("============ Boot end barrier")
             Barrier(end_boot_barrier_label)
 
+        # requesting current_page again, as the set_privilege_level might have changed it
+        curr_state = state_manager.get_active_state()
+        curr_page_table = curr_state.current_el_page_table
         # selecting random block to jump to for test body
         available_blocks = curr_page_table.segment_manager.get_segments(pool_type=Configuration.Memory_types.CODE, non_exclusive_only=True)
         selected_block = choice.choice(values=available_blocks)
         branch_to_segment.BranchToSegment(selected_block).one_way_branch()
 
         # setting back to boot code for the print, later return to selected block
-        switch_code(boot_block)
+
+        curr_state.current_code_block = boot_block
         AsmLogger.comment(f"========================= {curr_state.state_name.upper()} BOOT CODE - end =====================")
+        curr_state.current_code_block = selected_block
         switch_code(selected_block)
 
-    # Create a new list with blocks in the desired order
-    all_code_blocks = []
-    all_code_blocks.extend(bsp_boot_blocks)  # BSP boot code first
-    all_code_blocks.extend(boot_blocks)  # Then boot code
-    all_code_blocks.extend(available_blocks)  # Finally regular code blocks
+    # # Create a new list with blocks in the desired order
+    # all_code_blocks = []
+    # all_code_blocks.extend(bsp_boot_blocks)  # BSP boot code first
+    # all_code_blocks.extend(boot_blocks)  # Then boot code
+    # all_code_blocks.extend(available_blocks)  # Finally regular code blocks
+
+def set_privilege_level():
+    logger = get_logger()
+    if Configuration.Architecture.arm:
+        exception_level = Configuration.Knobs.Config.exception_level.get_value()
+        current_state = get_current_state()
+        current_el_level = current_state.current_el_level
+        if current_el_level != 3:
+            raise ValueError(f"Current EL level is {current_el_level}, but expected to be 3")
+        if exception_level != 3:
+            from Arrow.Tool.asm_libraries.switch_el import switch_EL
+            logger.info(f"================ Switching to EL{exception_level}")
+            switch_EL(target_el_level=exception_level)
+    else:
+        privilege_level = Configuration.Knobs.Config.privilege_level.get_value()
+        logger.warning(f"Setting privilege level to {privilege_level} is currently not supported for {Configuration.Architecture} architecture")
 
 
 def enable_page_tables():

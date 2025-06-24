@@ -21,6 +21,12 @@ def do_final():
         logger.debug("============ Test end barrier")
         Barrier(end_test_barrier_label)
 
+        current_el_level = curr_state.current_el_level
+        if current_el_level != 3:
+            from Arrow.Tool.asm_libraries.switch_el import switch_EL
+            logger.info(f"================ Switching to EL3")
+            switch_EL(target_el_level=3)
+
         logger.debug("============ Test end convention")
         end_test.end_test_asm_convention(test_pass=True)
 

@@ -1,5 +1,5 @@
 import random
-from Arrow.Utils.configuration_management.enums import Tag
+from Arrow.Utils.configuration_management.enums import Tag, Architecture
 from Arrow.Utils.configuration_management.knob_manager import Knob
 
 
@@ -7,8 +7,10 @@ class Knobs:
     class Config:
         core_count = Knob(name='core_count', value_func=1, read_only=True, dynamic=False, global_knob=False)
         processor_mode = Knob(name='processor_mode', value_func=lambda: random.choice(["comp32","64bit"]), read_only=True, dynamic=False, global_knob=False)
-        privilege_level = Knob(name='privilege_level', value_func=lambda: random.randint(0,3), read_only=True, dynamic=False, global_knob=False)
         skip_boot = Knob(name='skip_boot', value_func=False, read_only=True, dynamic=False, global_knob=False)
+        exception_level = Knob(name='exception_level', value_func=lambda: random.choices([1,3], weights=[0.05, 0.95], k=1)[0] if Architecture.arm else None, read_only=True, dynamic=False, global_knob=False)
+        privilege_level = Knob(name='privilege_level', value_func=lambda: random.randint(0,3) if not Architecture.arm else None, read_only=True, dynamic=False, global_knob=False )
+            
     class Template:
         scenario_count = Knob(name='scenario_count', value_func=lambda: random.randint(3,6), read_only=True, dynamic=False, global_knob=False)
         scenario_query = Knob(name='scenario_query', value_func={Tag.REST:100}, read_only=True, dynamic=True, global_knob=False)
