@@ -71,12 +71,14 @@ def generate_binary():
     else:
         pipeline.link(object_file, executable_file)
 
-    # Step 5: Run the executable on ISS
+    # Step 5: Merge the asm file with the objdump file
+    merge_files(assembly_file, objdump_file, debug_aid_file)
+
+    # Step 6: Run the executable on ISS
     pipeline.golden_reference_simolator(executable_file, iss_prerun_log_file)
 
 
-    # Step 6: Merge the asm file with the objdump file
-    merge_files(assembly_file, objdump_file, debug_aid_file)
+
 
 
 

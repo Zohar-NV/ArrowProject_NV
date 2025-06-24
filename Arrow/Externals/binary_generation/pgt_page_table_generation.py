@@ -280,12 +280,16 @@ def create_automated_memory_mapping(PMM, EL3, EL1NS):
     core_page_tables = current_state.enabled_page_tables
 
    
-    # Trickbox device memory 
+    # Trickbox device memory - setting its mapping for both EL3 and EL1NS
     trickbox_size = SIZE_2MB               
     trickbox_va = createAddress(0x13000000) 
-    trickbox_attr = createMmuAttributes()
-    FillStage1BlockAttributes(trickbox_attr, NS=ROOT, XN=XN_CLEAR, AP=PL1_RW, MEM_ATTR_OUTER=Dev, MEM_ATTR_INNER=Dev_nGnRnE)
-    mapDevice(EL3, "TRICKBOX", trickbox_va, trickbox_size, trickbox_attr)
+    el3_trickbox_attr = createMmuAttributes()
+    FillStage1BlockAttributes(el3_trickbox_attr, NS=ROOT, XN=XN_CLEAR, AP=PL1_RW, MEM_ATTR_OUTER=Dev, MEM_ATTR_INNER=Dev_nGnRnE)
+    mapDevice(EL3, "TRICKBOX", trickbox_va, trickbox_size, el3_trickbox_attr)
+    el1_trickbox_attr = createMmuAttributes()
+    FillStage1BlockAttributes(el1_trickbox_attr, NS=NON_SECURE, XN=XN_CLEAR, AP=PL1_RW, MEM_ATTR_OUTER=Dev, MEM_ATTR_INNER=Dev_nGnRnE)
+    mapDevice(EL1NS, "TRICKBOX", trickbox_va, trickbox_size, el1_trickbox_attr)
+    
 
     # PGT Constants region mapping (VA=PA identity mapping for EL3) 
     constants_size = SIZE_4KB * 4  # 16KB for constants  
