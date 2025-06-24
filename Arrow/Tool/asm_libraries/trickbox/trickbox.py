@@ -3,7 +3,7 @@ from Arrow.Tool.asm_libraries.trickbox.trickbox_fields import TrickboxField
 from Arrow.Tool.register_management.register import Register
 from Arrow.Tool.state_management import get_current_state
 from Arrow.Tool.asm_libraries.asm_logger import AsmLogger
-from Arrow.Tool.configuration import Configuration
+from Arrow.Utils.configuration_management import Configuration
 
 class Trickbox:
     """
