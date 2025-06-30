@@ -1,6 +1,6 @@
 from enum import Enum
 from typing import Dict
-from Arrow.Tool.state_management import get_state_manager
+from Arrow.Tool.state_management import get_state_manager, get_current_state
 from Arrow.Tool.state_management.switch_state import SwitchCode, SwitchPageTable
 from Arrow.Utils.singleton_management import SingletonManager
 from Arrow.Tool.asm_libraries.asm_logger import AsmLogger
@@ -123,8 +123,19 @@ class ExceptionTable:
             # print(f"callback_handler_code: {callback_handler_code}")
             # print(f"skipping_callback_memory: {skipping_callback_memory}")
 
+            fiq_handler_code, fiq_callback_memory = populate_fiq_handler(self.page_table)
+            # print(f"fiq_handler_code: {fiq_handler_code}")
+            # print(f"fiq_callback_memory: {fiq_callback_memory}")
+
+
             # set default target to each of the exceptions that don't have a target
             for exception in AArch64ExceptionVector:
+
+                if exception == AArch64ExceptionVector.CURRENT_SPX_FIQ:
+                    self.exception_entries[exception] = "fiq_label"
+                    self.exception_entries_code[exception] = fiq_handler_code.get_start_label()
+                    self.exception_callback_target[exception] = None
+
                 if exception not in self.exception_entries:
                     #self.exception_entries[exception] = self.halting_label
                     self.exception_entries[exception] = "halting_label"
@@ -303,41 +314,44 @@ def populate_fiq_handler(page_table:PageTable):
 
         fiq_handler_code_label = Label(postfix="fiq_handler_code_label")
         with SwitchCode(fiq_handler_code):
-            AsmLogger.comment(f"------- fiq hander for {page_table.page_table_name} -------")
+            AsmLogger.comment(f"------- fiq handler for {page_table.page_table_name} -------")
             AsmLogger.asm(f"{fiq_handler_code_label}:")
             AsmLogger.asm(f"nop")
 
+            current_state = get_current_state()
+            register_manager = current_state.register_manager
+            reg1 = register_manager.get_and_reserve()
+            reg2 = register_manager.get_and_reserve()
 
-            AsmLogger.comment(f"Save x0 and x1 to the stack")
-            # TODO:: fault with ESR 0x96000045 when access the stack, need to fix it. 
-            #AsmLogger.asm(f"stp x0, x1, [sp, #-16]!", comment="Pre-decrement the stack pointer and store x0, x1")
-
+            AsmLogger.comment(f"Save {reg1} and {reg2} to the stack")
+            AsmLogger.asm(f"stp {reg1}, {reg2}, [sp, #-16]!", comment=f"Pre-decrement the stack pointer and store {reg1}, {reg2}")
 
             AsmLogger.comment(f"Read Interrupt ID")
-            AsmLogger.asm(f"mrs x8, s3_0_c12_c8_0", comment="ICC_IAR0_EL1")
-
-            AsmLogger.comment(f"check special INTID")
-            AsmLogger.asm(f"ldr x6, =0x3fc", comment="0x3fc")
-            AsmLogger.asm(f"cmp x8, x6", comment="compare x8 with 0x3fc")
-            AsmLogger.asm(f"beq ack_group1", comment="branch to ack_group1 if x8 is 0x3fc")
-            AsmLogger.asm(f"ldr x6, =0x3fd", comment="0x3fd")
-            AsmLogger.asm(f"cmp x8, x6", comment="compare x8 with 0x3fd")
-            AsmLogger.asm(f"beq ack_group1", comment="branch to ack_group1 if x8 is 0x3fd")
-            AsmLogger.asm(f"ldr x6, =0x3ff", comment="0x3ff")
-            AsmLogger.asm(f"cmp x8, x6", comment="compare x8 with 0x3ff")
-            AsmLogger.asm(f"beq ack_group1", comment="branch to ack_group1 if x8 is 0x3ff")
-
-            AsmLogger.comment(f"Set End-Of-Interrupt")
-            AsmLogger.asm(f"msr s3_0_c12_c8_1,x8", comment="ICC_EOIR0_EL1")
-            AsmLogger.asm(f"bl unmask_interrupts", comment="unmask_interrupts")
-
+            AsmLogger.asm(f"mrs {reg1}, s3_0_c12_c8_0", comment="ICC_IAR0_EL1")
 
             label_ack_group1 = Label(postfix="ack_group1")
+
+            AsmLogger.comment(f"check special INTID")
+            AsmLogger.asm(f"ldr {reg2}, =0x3fc", comment="0x3fc")
+            AsmLogger.asm(f"cmp {reg1}, {reg2}", comment=f"compare {reg1} with 0x3fc")
+            AsmLogger.asm(f"beq {label_ack_group1}", comment=f"branch to ack_group1 if {reg1} is 0x3fc")
+            AsmLogger.asm(f"ldr {reg2}, =0x3fd", comment="0x3fd")
+            AsmLogger.asm(f"cmp {reg1}, {reg2}", comment=f"compare {reg1} with 0x3fd")
+            AsmLogger.asm(f"beq {label_ack_group1}", comment=f"branch to ack_group1 if {reg1} is 0x3fd")
+            AsmLogger.asm(f"ldr {reg2}, =0x3ff", comment="0x3ff")
+            AsmLogger.asm(f"cmp {reg1}, {reg2}", comment=f"compare {reg1} with 0x3ff")
+            AsmLogger.asm(f"beq {label_ack_group1}", comment=f"branch to ack_group1 if {reg1} is 0x3ff")
+
+            AsmLogger.comment(f"Set End-Of-Interrupt")
+            AsmLogger.asm(f"msr s3_0_c12_c8_1,{reg1}", comment="ICC_EOIR0_EL1")
+            #AsmLogger.asm(f"bl unmask_interrupts", comment="unmask_interrupts")
+
+
             AsmLogger.asm(f"{label_ack_group1}:")
             AsmLogger.comment(f"Read Interrupt ID")
-            AsmLogger.asm(f"mrs x8, s3_0_c12_c12_0", comment="ICC_IAR1_EL1")
-            AsmLogger.asm(f"msr s3_0_c12_c12_1,x8", comment="ICC_EOIR1_EL1")
-            AsmLogger.asm(f"bl unmask_interrupts", comment="unmask_interrupts")
+            AsmLogger.asm(f"mrs {reg1}, s3_0_c12_c12_0", comment="ICC_IAR1_EL1")
+            AsmLogger.asm(f"msr s3_0_c12_c12_1,{reg1}", comment="ICC_EOIR1_EL1")
+            #AsmLogger.asm(f"bl unmask_interrupts", comment="unmask_interrupts")
 
             # AsmLogger.comment(f"Unmask Interrupts")
             # AsmLogger.asm(f"mrs x8,daif", comment="Read DAIF register")
@@ -346,11 +360,21 @@ def populate_fiq_handler(page_table:PageTable):
             # AsmLogger.asm(f"mov x6 , #0x340", comment="0x340")
             # AsmLogger.asm(f"and x8, x8, x6", comment="DAIF_FIQ_MASK")
 
-            AsmLogger.comment(f"Restore link register")
-            AsmLogger.asm(f"msr DAIFclr,#3", comment="DAIFclr,#3")
+            # AsmLogger.comment(f"Restore link register")
+            # AsmLogger.asm(f"msr DAIFclr,#3", comment="DAIFclr,#3")
 
-            AsmLogger.asm(f"mov x30, x9", comment="Restore link register")
-            AsmLogger.asm(f"br x30", comment="Branch to the link register")
+            # AsmLogger.asm(f"mov {reg1}, {reg2}", comment="Restore link register")
+            # AsmLogger.asm(f"br {reg1}", comment="Branch to the link register")
 
+
+            from Arrow.Tool.asm_libraries.trickbox import trickbox
+            trickbox = trickbox.Trickbox()
+            trickbox.write(register=Configuration.TrickboxRegister.CLEAR_FIQ, value=0x1)
+
+            # eret to the next LIP 
+            AsmLogger.asm(f"eret", comment="Return from exception")
+
+            register_manager.free(reg1)
+            register_manager.free(reg2)
 
     return fiq_handler_code, None
