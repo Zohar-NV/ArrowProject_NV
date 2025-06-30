@@ -15,6 +15,7 @@ from Arrow.Tool.asm_libraries.branch_to_segment.branch_to_segment import BranchT
 from Arrow.Tool.asm_libraries.event_trigger.event_trigger_base import EventTriggerBase
 from Arrow.Tool.asm_libraries.event_trigger.event_trigger import EventTrigger as EventTrigger_wrapper
 from Arrow.Tool.asm_libraries.barrier.barrier import Barrier as Barrier_wrapper
+from Arrow.Tool.state_management import get_state_manager, get_current_state
 from Arrow.Tool.state_management.switch_state import SwitchState as SwitchState_wrapper
 from Arrow.Tool.asm_libraries.switch_el import switch_EL as switch_EL_wrapper
 from Arrow.Tool.asm_libraries.trickbox.trickbox import Trickbox as Trickbox_wrapper
@@ -81,11 +82,6 @@ class AR:
     ) -> List[GeneratedInstruction]:
         return generate_wrapper(instruction_count, query, src, dest, comment)
 
-    @staticmethod
-    def SwitchState(
-            state_name: str,
-    ):
-        return SwitchState_wrapper(state_name)
 
     @staticmethod
     def switch_EL(target_el_level: int):
@@ -138,6 +134,34 @@ class AR:
         def read(field: Configuration.TrickboxRegister, register: Register):
             trickbox = Trickbox_wrapper()
             return trickbox.read(field, register)
+
+
+    @staticmethod
+    class State:
+        # @staticmethod
+        # def get_current_state() -> None:
+        #     state_manager = get_state_manager()
+        #     return state_manager.get_active_state()
+        
+        @staticmethod
+        def get_current_state_name() -> str:
+            state_manager = get_state_manager()
+            return state_manager.get_active_state().state_name
+
+        @staticmethod
+        def get_current_state_id() -> int:
+            state_manager = get_state_manager()
+            return state_manager.get_active_state().state_id
+
+        @staticmethod
+        def get_all_states_names() -> List[str]:
+            state_manager = get_state_manager()
+            return [state.state_name for state in state_manager.get_all_states()]
+
+        @staticmethod
+        def switch_state(state_name: str):
+            return SwitchState_wrapper(state_name)
+
 
 
     @staticmethod
