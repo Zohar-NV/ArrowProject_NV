@@ -1,5 +1,4 @@
 from typing import Optional
-from Arrow.Utils.configuration_management import Configuration
 from Arrow.Tool.asm_blocks.data_unit import get_last_user_context
 from Arrow.Utils.statistics_managment import get_statistics_manager
 
@@ -66,6 +65,9 @@ class AsmUnit:
 
 
 def get_comment_mark():
+    # Lazy import to avoid circular dependency
+    from Arrow.Utils.configuration_management import Configuration
+    
     if Configuration.Architecture.x86:
         return ";"
     elif Configuration.Architecture.riscv:

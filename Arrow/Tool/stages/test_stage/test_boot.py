@@ -54,6 +54,7 @@ def do_boot():
         if not skip_boot:
             enable_page_tables()
             enable_exception_tables()
+            set_init_system_registers()
             set_privilege_level()
             #generate(instruction_count=10)
             logger.debug("============ Boot end barrier")
@@ -79,6 +80,15 @@ def do_boot():
     # all_code_blocks.extend(bsp_boot_blocks)  # BSP boot code first
     # all_code_blocks.extend(boot_blocks)  # Then boot code
     # all_code_blocks.extend(available_blocks)  # Finally regular code blocks
+
+
+def set_init_system_registers():
+    from Arrow.Tool.asm_libraries.sysreg import SysReg
+
+    # in order to enable FIQ, we need to clear the DAIF bits, and set the SCR_EL3 to 0x6
+    SysReg.write(register=Configuration.SystemRegister.DAIF, value=0x0)
+    SysReg.write(register=Configuration.SystemRegister.SCR_EL3, value=0x6)
+
 
 def set_privilege_level():
     logger = get_logger()

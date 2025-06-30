@@ -18,6 +18,7 @@ from Arrow.Tool.asm_libraries.barrier.barrier import Barrier as Barrier_wrapper
 from Arrow.Tool.state_management import get_state_manager, get_current_state
 from Arrow.Tool.state_management.switch_state import SwitchState as SwitchState_wrapper
 from Arrow.Tool.asm_libraries.switch_el import switch_EL as switch_EL_wrapper
+from Arrow.Tool.asm_libraries.sysreg import SysReg as SysReg_wrapper
 from Arrow.Tool.asm_libraries.trickbox.trickbox import Trickbox as Trickbox_wrapper
 
 class AR:
@@ -126,14 +127,24 @@ class AR:
     @staticmethod
     class Trickbox:
         @staticmethod
-        def write(field: Configuration.TrickboxRegister, value: Optional[int] = None, register: Optional[Register] = None):
+        def write(register: Configuration.TrickboxRegister, value: Optional[int] = None, source_register: Optional[Register] = None):
             trickbox = Trickbox_wrapper()
-            return trickbox.write(field, value, register)
+            return trickbox.write(register, value, source_register)
 
         @staticmethod
-        def read(field: Configuration.TrickboxRegister, register: Register):
+        def read(register: Configuration.TrickboxRegister, target_register: Register):
             trickbox = Trickbox_wrapper()
-            return trickbox.read(field, register)
+            return trickbox.read(register, target_register)
+
+    @staticmethod
+    class Sysreg:
+        @staticmethod
+        def write(register: Configuration.SystemRegister, value: Optional[int] = None, source_register: Optional[Register] = None):
+            return SysReg_wrapper.write(register, value, source_register)
+
+        @staticmethod
+        def read(register: Configuration.SystemRegister, target_register: Register):
+            return SysReg_wrapper.read(register, target_register)
 
 
     @staticmethod

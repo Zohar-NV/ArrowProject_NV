@@ -6,6 +6,8 @@ from Arrow.Utils.configuration_management.knobs import Knobs
 class Configuration:
     from Arrow.Utils.configuration_management.enums import Architecture, Memory_types, Page_types, Page_sizes, ByteSize, Tag, Priority, PRIORITY_WEIGHTS, Frequency, Execution_context
     from Arrow.Tool.asm_libraries.trickbox.trickbox_fields import TrickboxRegister
+    from Arrow.Tool.asm_libraries.sysreg.sysreg_fields import SystemRegister
+
 
     Architecture = Architecture
     Memory_types = Memory_types
@@ -18,7 +20,8 @@ class Configuration:
     Frequency = Frequency
     Execution_context = Execution_context
     TrickboxRegister = TrickboxRegister
-
+    SystemRegister = SystemRegister
+    
     Knobs = Knobs()
 
 
