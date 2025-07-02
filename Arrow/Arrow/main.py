@@ -20,6 +20,11 @@ def main(args=None):
 
     logger = get_logger()
     parse_arguments(args)
+
+    # Print the path to the Python executable
+    logger.debug(f"-------- Python executable path: {sys.executable}")
+    logger.debug(f"-------- Python version: {sys.version}")
+
     logger.info("==== Arrow main")
 
     try:

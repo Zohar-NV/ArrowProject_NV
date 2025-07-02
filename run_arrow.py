@@ -1,4 +1,4 @@
-#!/home/scratch.zbuchris_cpu/Arrow/ArrowProject_NV/.venv/bin/python3
+#!/home/ip/nvcpu/dv/arrow/0.7/arrow_dependencies/python_venv/.venv/bin/python3
  
 """
 Arrow Project Entry Point

@@ -83,11 +83,16 @@ def do_boot():
 
 
 def set_init_system_registers():
+
+    AsmLogger.comment("Setting initial system registers")
     from Arrow.Tool.asm_libraries.sysreg import SysReg
 
     # in order to enable FIQ, we need to clear the DAIF bits, and set the SCR_EL3 to 0x6
     SysReg.write(register=Configuration.SystemRegister.DAIF, value=0x0)
     SysReg.write(register=Configuration.SystemRegister.SCR_EL3, value=0x6)
+
+    # Set CPACR_EL1.FPEN to 3 (no trapping of FP/SIMD)
+    SysReg.write_field(Configuration.SystemRegisterBitField.CPACR_EL1_FPEN, value=3)
 
 
 def set_privilege_level():
