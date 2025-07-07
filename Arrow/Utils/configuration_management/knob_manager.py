@@ -93,6 +93,31 @@ class KnobManager:
         """Override the value of a knob."""
         knob = self.get_knob(name)
         # no need to check if knob exist, get_knob will raise exception if not found
+        
+        # Auto-convert string values to match the original knob's type
+        if isinstance(new_value, str):
+            # Get the original value to determine the expected type
+            original_value = knob.get_value()
+            if isinstance(original_value, int):
+                try:
+                    new_value = int(new_value)
+                except ValueError:
+                    raise ValueError(f"Cannot convert '{new_value}' to integer for knob '{name}'")
+            elif isinstance(original_value, float):
+                try:
+                    new_value = float(new_value)
+                except ValueError:
+                    raise ValueError(f"Cannot convert '{new_value}' to float for knob '{name}'")
+            elif isinstance(original_value, bool):
+                # Handle boolean conversion
+                if new_value.lower() in ('true', '1', 'yes', 'on'):
+                    new_value = True
+                elif new_value.lower() in ('false', '0', 'no', 'off'):
+                    new_value = False
+                else:
+                    raise ValueError(f"Cannot convert '{new_value}' to boolean for knob '{name}'. Use true/false, 1/0, yes/no, or on/off")
+            # For strings, keep as string (no conversion needed)
+        
         knob.set_value(new_value)
         self.knobs[name] = knob
 

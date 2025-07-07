@@ -104,6 +104,43 @@ def normalize_mnemonic(mnemonic):
         return 'b' + mnemonic[2:]
     return mnemonic
 
+def get_known_equivalent_instructions():
+    """
+    Dictionary of known equivalent instruction pairs.
+    Key: ASM instruction, Value: list of equivalent objdump instructions
+    """
+    return {
+        'lslv': ['lsl'],
+        'lsrv': ['lsr'],
+        'asrv': ['asr'],
+        'rorv': ['ror'],
+        'udiv': ['udiv'],
+        'sdiv': ['sdiv'],
+        'sbfm': ['sbfx'],
+        'ubfm': ['ubfiz'],
+        # Add more known equivalents as needed
+        # 'asm_mnemonic': ['obj_mnemonic1', 'obj_mnemonic2'],
+    }
+
+def are_instructions_equivalent(asm_mnemonic, obj_mnemonic):
+    """Check if two instruction mnemonics are known to be equivalent"""
+    known_equivalents = get_known_equivalent_instructions()
+    
+    # Direct match
+    if asm_mnemonic == obj_mnemonic:
+        return True
+    
+    # Check if ASM instruction has known objdump equivalents
+    if asm_mnemonic in known_equivalents:
+        return obj_mnemonic in known_equivalents[asm_mnemonic]
+    
+    # Check reverse mapping (objdump -> ASM)
+    for asm_instr, obj_equivalents in known_equivalents.items():
+        if obj_mnemonic == asm_instr and asm_mnemonic in obj_equivalents:
+            return True
+    
+    return False
+
 def check_before_after_alignment(asm_instructions, obj_instructions, current_idx):
     """
     Check if instructions before and after the current position are aligned.
@@ -217,12 +254,14 @@ def merge_files(asm_file, objdump_file, output_file):
                     normalized_asm = normalize_mnemonic(asm_mnemonic)
                     normalized_obj = normalize_mnemonic(objdump_mnemonic)
                     
-                    # Check if they match
-                    if normalized_asm == normalized_obj:
-                        # Perfect match
+                    # Check if they match (exact or known equivalent)
+                    if are_instructions_equivalent(normalized_asm, normalized_obj):
+                        # Perfect match or known equivalent
                         prefix = f"[{addr}] "
                         merged_line = prefix + original_line
                         f_out.write(merged_line + '\n')
+                        if normalized_asm != normalized_obj:
+                            logger.debug(f"Info: Known equivalent instruction at line {line_num}: ASM='{asm_mnemonic}' ≈ OBJ='{objdump_mnemonic}' (known equivalent)")
                         section_instruction_index += 1
                     else:
                         # Mismatch - check if before and after instructions are aligned
@@ -235,7 +274,7 @@ def merge_files(asm_file, objdump_file, output_file):
                             section_instruction_index += 1
                         else:
                             # Cannot confirm equivalence - this is an error
-                            error_msg = f"ERROR: Misaligned instruction at line {line_num}: ASM='{asm_mnemonic}' vs OBJ='{objdump_mnemonic}' (before/after not aligned)"
+                            error_msg = f"Misaligned instruction at line {line_num}: ASM='{asm_mnemonic}' vs OBJ='{objdump_mnemonic}' (before/after not aligned)"
                             logger.error(error_msg)
                             errors.append(error_msg)
                             
