@@ -21,11 +21,16 @@ def init_state():
     logger.info("============ init_state")
     state_manager = get_state_manager()
 
-
     core_count = Configuration.Knobs.Config.core_count.get_value()
+    thread_count = Configuration.Knobs.Config.thread_count.get_value()
+    states = []
     for i in range(core_count):
+        for j in range(thread_count):
+            state_id = f'core{i}_thread{j}'
+            states.append(state_id)
+
+    for i, state_id in enumerate(states):
         # create a state singleton for thread i, and set its values
-        state_id = f'core_{i}'
         logger.info(f'--------------- Creating state for {state_id}')
 
 
@@ -93,7 +98,7 @@ def init_state():
         curr_state.base_register = curr_state.register_manager.get_and_reserve()
         # print(curr_state)
 
-    state_manager.set_active_state('core_0')
+    state_manager.set_active_state('core0_thread0')
 
 
 def init_registers():
@@ -108,7 +113,7 @@ def init_registers():
         # Preserving a register to be used as base_register
         curr_state.base_register = curr_state.register_manager.get_and_reserve()
 
-    state_manager.set_active_state("core_0")
+    state_manager.set_active_state("core0_thread0")
 
 
 def init_page_tables():
@@ -130,7 +135,7 @@ def init_page_tables():
         curr_state = state_manager.set_active_state(state_name)
         curr_state.current_el_page_table = el3r
 
-    state_manager.set_active_state("core_0")
+    state_manager.set_active_state("core0_thread0")
     
     page_tables = page_table_manager.get_all_page_tables()
 
@@ -163,7 +168,7 @@ def init_page_tables():
                 page = page_table.allocate_page(size=size, page_type=type, sequential_page_count=sequential_page_count)
 
 
-    state_manager.set_active_state("core_0")
+    state_manager.set_active_state("core0_thread0")
 
 
 def init_segments():
@@ -178,7 +183,7 @@ def init_segments():
     # TODO:: make this configurable as a knob
     bsp_boot_address = 0x82000000
 
-    core_0_el3_page_table = next(page_table for page_table in page_tables if page_table.core_id == "core_0" and page_table.execution_context == Configuration.Execution_context.EL3)
+    core_0_el3_page_table = next(page_table for page_table in page_tables if page_table.core_id == "core0_thread0" and page_table.execution_context == Configuration.Execution_context.EL3)
     # Allocate BSP boot segment. a single segment that act as trampoline for all cores
     bsp_boot_segment = core_0_el3_page_table.segment_manager.allocate_memory_segment(name=f"BSP__boot_segment", 
                                                                     byte_size=0x200,

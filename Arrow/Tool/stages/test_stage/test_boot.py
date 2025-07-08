@@ -225,7 +225,7 @@ def enable_exception_tables():
 def do_bsp_boot():
     logger = get_logger()
     state_manager = get_state_manager()
-    curr_state = state_manager.set_active_state("core_0")
+    curr_state = state_manager.set_active_state("core0_thread0")
     core_0_el3_page_table = curr_state.current_el_page_table
     if core_0_el3_page_table.execution_context != Configuration.Execution_context.EL3:
         raise ValueError(f"Current page table at this stage should be EL3 page table, but it is {core_0_el3_page_table.execution_context}")

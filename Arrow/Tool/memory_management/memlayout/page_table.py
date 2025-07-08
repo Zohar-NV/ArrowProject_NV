@@ -47,7 +47,7 @@ class PageTable:
         
         Args:
             mmu_name: Unique identifier for this MMU (e.g., "c0_el3root", "c1_el1NS")
-            state_name: State this MMU belongs to (e.g., "core_0", "core_1")
+            state_name: State this MMU belongs to (e.g., "core0_thread0", "core0_thread1")
             execution_context: Execution context (EL3, EL1_NS, EL1_S, EL2_NS, EL2_S, etc.)
         """
         logger = get_memory_logger()

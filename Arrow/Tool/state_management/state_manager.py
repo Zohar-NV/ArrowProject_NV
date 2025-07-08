@@ -169,7 +169,7 @@ class State_manager:
         :param state_id: Unique identifier for the state to set as active
         """
         if state_id not in self.states_dict:
-            raise ValueError(f"State with ID {state_id} does not exist.")
+            raise ValueError(f"State with ID {state_id} does not exist. valid states are {self.states_dict.keys()}")
         self.active_state_id = state_id
         return self.states_dict[state_id]
 
