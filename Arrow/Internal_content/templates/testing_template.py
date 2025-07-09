@@ -17,33 +17,74 @@ from Arrow.Arrow_API.resources.register_manager import RegisterManager_API as Re
 
 
 
-Configuration.Knobs.Config.core_count.set_value(1)
-Configuration.Knobs.Template.scenario_count.set_value(1)
+Configuration.Knobs.Config.core_count.set_value(2)
+Configuration.Knobs.Template.scenario_count.set_value(5)
+#Configuration.Knobs.Config.exception_level.set_value(1)
 
 
 #Configuration.Knobs.Template.scenario_query.set_value({"simple_cache_scenario":100, "WFIT_CROSS_SPE_scenario": 0, Configuration.Tag.REST: 1})
-Configuration.Knobs.Template.scenario_query.set_value({"enter_tc1_scenario": 100})
+#Configuration.Knobs.Template.scenario_query.set_value({"enter_tc1_scenario": 100})
+Configuration.Knobs.Template.scenario_query.set_value({"random_instructions": 100})
 #Configuration.Knobs.Template.scenario_query.set_value({"basic_false_sharing_scenario": 50, "ldstcc_release_rar_check": 50, Configuration.Tag.REST: 1})
+
 
 
 
 @AR.scenario_decorator(random=True, )
 def enter_tc1_scenario():
 
-    AR.comment("entering TC1")
-    AR.Trickbox.write(field=Configuration.TrickboxField.TARGET_CPU, value=0x1)
-    AR.Trickbox.write(field=Configuration.TrickboxField.SCHEDULE_FIQ, value=0x105)
+    from Arrow.Tool.state_management import get_current_state
+    current_state = get_current_state()
+    if current_state.state_name == "core0_thread1":
+        return
 
-    #AR.asm("wfi")
+    barrier1_label = AR.Label(postfix="sync_barrier_1")
+
+    with AR.State.switch_state(state_name="core0_thread0"):
+        AR.Barrier(barrier1_label)
+        AR.comment("entering TC1")
+        AR.asm("nop")
+
+        AR.asm("isb")
+
+        AR.asm("wfi")
+        for _ in range(10):
+            AR.asm("nop")
+
+    with AR.State.switch_state(state_name="core0_thread1"):
+        AR.Barrier(barrier1_label)
+
+        for _ in range(10):
+            AR.asm("nop")
+        AR.Trickbox.write(register=Configuration.TrickboxRegister.TARGET_CPU, value=0x1)
+        AR.Trickbox.write(register=Configuration.TrickboxRegister.SCHEDULE_FIQ, value=0x10)
+        for _ in range(50):
+            AR.asm("nop")
 
 
 @AR.scenario_decorator(random=True, )
 def random_instructions():
     AR.comment("inside random_instructions")
 
+
+    print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
+    #AR.generate(query=(AR.Instruction.steering_class == "mx_pred"), instruction_count=10)
+    AR.generate(query=(AR.Instruction.steering_class.contains("mx_pred")), instruction_count=10)
+    print('zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz')
+
+
+    return 
     AR.comment("Im at EL3 for the first time")
     for _ in range(10):
         AR.asm("nop")
+
+
+    with AR.State.switch_state(state_name="core0_thread0"):
+        AR.asm("nop")
+
+    with AR.State.switch_state(state_name="core0_thread1"):
+        AR.asm("nop")
+
 
     AR.comment("Switching to EL1")
     #from Arrow.Tool.asm_libraries.switch_el import switch_EL
@@ -74,7 +115,13 @@ def random_instructions():
     from Arrow.Tool.exception_management import AArch64ExceptionVector, AArch64ExceptionSyndrome
 
     with Exception(exception_type=AArch64ExceptionVector.CURRENT_SPX_SYNCHRONOUS, exception_syndrome=AArch64ExceptionSyndrome.ILLEGAL_EXECUTION_STATE, handler="skipping_handler"):
+        for _ in range(10):
+            AR.asm("nop")
+
         AR.asm(".word 0xFFFFFFFF", comment="Invalid instruction that will trigger undefined exception")
+        for _ in range(10):
+            AR.asm("nop")
+
 
     for _ in range(10):
         AR.asm("nop")
@@ -167,19 +214,6 @@ def random_instructions():
     # #     AR.generate(instruction_count=10)
 
     # # AR.asm(f"nop")
-
-
-
-def koko():
-    print("koko")
-
-
-    mem_block = MemoryManager.MemoryBlock(name="block1", byte_size=20)
-    mem1 = MemoryManager.Memory(name='mem1_partial1', memory_block=mem_block, memory_block_offset=2, byte_size=4)
-    mem2 = MemoryManager.Memory(name='mem1_partial2', memory_block=mem_block, memory_block_offset=14, byte_size=4)
-
-    AR.asm(f"mov {mem1}, 0x1234")
-    AR.generate(src=mem2, comment="load mem2")
 
 
 

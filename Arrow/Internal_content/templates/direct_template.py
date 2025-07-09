@@ -6,8 +6,9 @@ from Arrow.Arrow_API.resources.register_manager import RegisterManager_API as Re
 
 
 # Setting the number of cores (PEs) and scenarios
-Configuration.Knobs.Config.core_count.set_value(2)
+#Configuration.Knobs.Config.core_count.set_value(2)
 Configuration.Knobs.Template.scenario_count.set_value(2)
+
 
 # Setting the scenarios to be used
 Configuration.Knobs.Template.scenario_query.set_value({"random_instructions": 100, Configuration.Tag.REST: 1})
@@ -18,15 +19,18 @@ def random_instructions():
     AR.comment("inside random_instructions")
 
     # case 1: generate 3 random instructions
+    AR.comment("Case 1: generate 3 random instructions")
     AR.generate(instruction_count=3)
 
     # Case 2: generate an assembly loop of 50 iteration, inside the loop generate 3 times the following: one ADC instruciton and 2 instructions from steering class mx
+    AR.comment("Case 2: generate an assembly loop of 50 iteration, inside the loop generate 3 times the following: one ADC instruciton and 2 instructions from steering class mx")
     with AR.Loop(counter=50):
         for _ in range(3):
             AR.generate(query=(AR.Instruction.mnemonic.contains("ADC")))
             AR.generate(query=(AR.Instruction.steering_class.contains("mx")), instruction_count=2)
 
     # Case 3: generate an assembly ADD instruction, followed by a random instruction that uses the register as its destination 
+    AR.comment("Case 3: generate an assembly ADD instruction, followed by a random instruction that uses the register as its destination")
     reg = RegisterManager.get_and_reserve(reg_type="gpr")
     reg2 = RegisterManager.get(reg_type="gpr")
     AR.asm(f"add {reg}, {reg}, {reg2}", comment=f"adding {reg} = {reg} + {reg2}")
@@ -37,14 +41,16 @@ def random_instructions():
 
 
     # Case 4: generate a memory operand and access it. 
-    mem = MemoryManager.Memory(init_value=0x456)
+    AR.comment("Case 4: generate a memory operand and access it.")
+    mem = MemoryManager.Memory(init_value=0x456, alignment=3)
     # print(f"using Mem {mem}") # uncomment if you want to see address and properties of selected memory
     AR.generate(src=mem, comment="load mem")
     AR.generate(dest=mem, comment="store mem")
 
     # Case 5: a loop with an inner EventTrigger to alternate memory operand for later access 
-    mem1 = MemoryManager.Memory(init_value=0x1234)
-    mem2 = MemoryManager.Memory(init_value=0x5678)
+    AR.comment("Case 5: a loop with an inner EventTrigger to alternate memory operand for later access")
+    mem1 = MemoryManager.Memory(init_value=0x1234, alignment=3)
+    mem2 = MemoryManager.Memory(init_value=0x5678, alignment=3)
     reg = RegisterManager.get_and_reserve(reg_type = "gpr")
     
     with AR.Loop(counter=100):

@@ -11,13 +11,13 @@ def ldstcc_release_rar_check():
     mem0 = MemoryManager.Memory(init_value=0x1234, cross_core=True, alignment=3)
     mem1 = MemoryManager.Memory(init_value=0x5678, cross_core=True, alignment=3)
 
-    with AR.SwitchState(state_name="core_0"):
+    with AR.SwitchState(state_name="core0_thread0"):
         AR.Barrier(barrier_label)
         for _ in range(10):
             AR.generate(query=(AR.Instruction.mnemonic.contains("ldsetal")), src=mem0)
             AR.generate(query=(AR.Instruction.mnemonic.contains("ldr")), src=mem1)
 
-    with AR.SwitchState(state_name="core_1"):
+    with AR.SwitchState(state_name="core0_thread1"):
         AR.Barrier(barrier_label)
         for _ in range(10):
             AR.generate(query=(AR.Instruction.mnemonic.contains("stlr")), src=mem1)

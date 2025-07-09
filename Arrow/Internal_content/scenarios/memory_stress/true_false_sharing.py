@@ -20,7 +20,7 @@ def basic_false_sharing_scenario():
     block_size = 0x50
     cross_core_memory_block = MemoryManager.MemoryBlock(name="false_sharing_cross_core_memory_block", byte_size=block_size, cross_core=True)
 
-    pre_core_mem_dict = {"core_0": [], "core_1": []}
+    pre_core_mem_dict = {"core0_thread0": [], "core0_thread1": []}
 
     offset = 0
     block_base_address = cross_core_memory_block.get_address()
@@ -37,7 +37,7 @@ def basic_false_sharing_scenario():
         if offset + mem_byte_size > block_size:
             break
             
-        core = AR.choice(values=["core_0", "core_1"])
+        core = AR.choice(values=["core0_thread0", "core0_thread1"])
         mem = MemoryManager.Memory(name=f"false_sharing_{core}_{hex(offset)}", byte_size=mem_byte_size, memory_block=cross_core_memory_block, memory_block_offset=offset)
         pre_core_mem_dict[core].append(mem)
         
