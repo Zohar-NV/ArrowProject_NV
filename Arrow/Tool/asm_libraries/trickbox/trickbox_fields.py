@@ -9,8 +9,9 @@ class TrickboxRegister(Enum):
     CONFIGURATION = 0x0004
     SCHEDULE_FIQ = 0x0008
     SCHEDULE_IRQ = 0x000C
+    CLEAR_FIQ = 0x0010
 
-    raise Exception(" Please provide additional trickbox fields of your choice")
+    print("TODO:: Please provide additional trickbox fields of your choice")
 
 
     def __str__(self):

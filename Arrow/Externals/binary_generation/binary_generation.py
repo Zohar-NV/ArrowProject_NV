@@ -54,7 +54,7 @@ def generate_binary():
     pipeline.assemble(assembly_file, object_file)
 
     # TODO:: replace this hard-coded with a proper logic! 
-    PGT_enabled=True # TODO:: replace this hard-coded with a proper logic! 
+    PGT_enabled=False # TODO:: replace this hard-coded with a proper logic! 
     if Configuration.Architecture.arm and PGT_enabled:
 
         page_table_asm_file = os.path.join(output_dir, "pgt", "pg_generic_gnu.s")
@@ -69,7 +69,8 @@ def generate_binary():
     if Configuration.Architecture.arm and PGT_enabled:
         pipeline.link_automated(object_file, page_table_object, constants_object, executable_file)
     else:
-        pipeline.link(object_file, executable_file)
+        return
+        #pipeline.link(object_file, executable_file)
 
     # Step 5: Merge the asm file with the objdump file
     merge_files(assembly_file, objdump_file, debug_aid_file)

@@ -100,7 +100,7 @@ def end_test_asm_convention(test_pass: bool = True, status_code=0) -> None:
             # Print a string to the trickbox tube
             AsmLogger.comment("Print a string to the trickbox tube")
 
-            raise Exception(" Please provide Trickbox writing code to indicate test ended")
+            print("TODO:: Please provide Trickbox writing code to indicate test ended - dont write anything for now")
 
             AsmLogger.asm(f"{label}:")
             AsmLogger.asm(f"wfi", comment="End of test convention. not expecting to be waked")

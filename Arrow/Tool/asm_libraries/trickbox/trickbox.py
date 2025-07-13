@@ -11,7 +11,7 @@ class Trickbox:
     This class generates assembly code to access trickbox registers at the base address
     """
     
-    raise Exception(" Please provide Trickbox base address of your choice")
+    print("TODO:: Please provide Trickbox base address of your choice - setting to 0x0 for now")
     TRICKBOX_BASE_ADDRESS = 0x0
     
     def write(self, register: Configuration.TrickboxRegister, value: Optional[int] = None, source_register: Optional[Register] = None):

@@ -19,7 +19,7 @@ class ArmBuildPipeline(BuildPipeline):
             3. Optionally verify the ELF file using `objdump`.
         """
         self.toolchain_prefix = "aarch64-unknown-linux-gnu"
-        self.toolchain_extensions = "-march=armv9.2"
+        self.toolchain_extensions = "-march=armv9.2-a"
 
     def cpp_to_asm(self, cpp_file, asm_file):
         """

@@ -18,8 +18,10 @@ class SystemRegister(Enum):
     SSBS = "ssbs"  # Speculative Store Bypass Safe
     TCO = "tco"  # Tag Check Override
     UAO = "uao"  # User Access Override
+    SCR_EL3 = "scr_el3"  # Secure Configuration Register
+    CPACR_EL1 = "cpacr_el1"  # Coprocessor Access Control Register
 
-    raise Exception(" Please provide additional sysregs of your choice")
+    print("TODO:: Please provide additional sysregs of your choice")
 
 
 
@@ -35,13 +37,13 @@ class SystemRegisterBitField(Enum):
     bit_range can be a single bit (int) or a tuple (start_bit, end_bit) for multi-bit fields
     """
     
-    # === CPACR_EL1 Bit Fields ===
+    # # === CPACR_EL1 Bit Fields ===
     CPACR_EL1_FPEN = (SystemRegister.CPACR_EL1, "FPEN", (21, 20), "Floating-point Enable")
     CPACR_EL1_ZEN = (SystemRegister.CPACR_EL1, "ZEN", (17, 16), "SVE Enable")
     CPACR_EL1_SMEN = (SystemRegister.CPACR_EL1, "SMEN", (25, 24), "SME Enable")
     CPACR_EL1_E0POE = (SystemRegister.CPACR_EL1, "E0POE", 28, "EL0 Access to POE registers")
 
-    raise Exception(" Please provide additional sysreg bitfields of your choice")
+    print("TODO:: Please provide additional sysreg bitfields of your choice")
 
 
     def __str__(self):

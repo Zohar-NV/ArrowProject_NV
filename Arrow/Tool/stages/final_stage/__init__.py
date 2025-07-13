@@ -18,7 +18,7 @@ def final_section():
 
     create_binary = config_manager.get_value('Create_binary')
 
-    enable_mmu = True # config_manager.get_value('Enable_MMU')
+    enable_mmu = False # config_manager.get_value('Enable_MMU')
     if enable_mmu and create_binary:
         run_PGT_prototype()
 

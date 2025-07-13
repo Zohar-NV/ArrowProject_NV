@@ -15,7 +15,7 @@ class SystemRegisterBitField(Enum):
     CPACR_EL1_SMEN = (SystemRegister.CPACR_EL1, "SMEN", (25, 24), "SME Enable")
     CPACR_EL1_E0POE = (SystemRegister.CPACR_EL1, "E0POE", 28, "EL0 Access to POE registers")
     
-    raise Exception(" Please provide additional sysreg bitfields of your choice")
+    print("TODO:: Please provide additional sysreg bitfields of your choice")
 
 
     def __str__(self):
