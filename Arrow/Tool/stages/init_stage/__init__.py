@@ -119,7 +119,7 @@ def init_registers():
 def init_page_tables():
 
     logger = get_logger()
-    logger.info("======== init_segments")
+    logger.info("======== init_page_tables")
     memory_logger = get_memory_logger()
     state_manager = get_state_manager()
     page_table_manager = get_page_table_manager()
@@ -266,7 +266,7 @@ def init_exception_tables():
             exception_table.populate_exception_table()
 
             vbar_label = exception_table.get_vbar_label()
-            logger.info(f"============ init_exception_tables: {page_table.page_table_name} vbar_label: {vbar_label}")
+            logger.debug(f"============ init_exception_tables: {page_table.page_table_name} vbar_label: {vbar_label}")
 
 
 def init_scenarios():
@@ -311,7 +311,7 @@ def init_scenarios():
             foo = importlib.util.module_from_spec(spec)
             sys.modules["scenarios_path"] = foo
             spec.loader.exec_module(foo)
-            logger.info("================ External content import successful")
+            logger.debug("================ External content import successful")
             
         except Exception as e:
             logger.error(f"Failed to import external content: {e}")

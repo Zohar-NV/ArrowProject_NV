@@ -218,7 +218,7 @@ def populate_halting_handler(page_table:PageTable):
             AsmLogger.asm(f"{halting_label}:")
             AsmLogger.asm(f"nop")
 
-            print(f"Exception handling:: WA WA WA - at the moment hard-coding support for UD case. need to generelize - remove after")
+            # print(f"Exception handling:: WA WA WA - at the moment hard-coding support for UD case. need to generelize - remove after")
             # print(f"WA WA WA - at the moment hard-coding support for UD case. need to generelize - remove after")
             # print(f"WA WA WA - at the moment hard-coding support for UD case. need to generelize - remove after")
 
@@ -280,11 +280,11 @@ def populate_callback_handler(page_table:PageTable):
             AsmLogger.asm(f"{callback_label}:")
             AsmLogger.asm(f"nop")
 
-            print(f"Exception handling:: WA WA WA - need to randomize and protect the register, at the moment hard-coding x0 - remove after")
+            # print(f"Exception handling:: WA WA WA - need to randomize and protect the register, at the moment hard-coding x0 - remove after")
             # print(f"WA WA WA - need to randomize and protect the register, at the moment hard-coding x0 - remove after")
             # print(f"WA WA WA - need to randomize and protect the register, at the moment hard-coding x0 - remove after")
 
-            print(f"Exception handling:: WA WA WA - assume callback is hardcoded for LOWER_A64_SYNCHRONOUS - not accurate - remove after")
+            # print(f"Exception handling:: WA WA WA - assume callback is hardcoded for LOWER_A64_SYNCHRONOUS - not accurate - remove after")
             # print(f"WA WA WA - assume callback is hardcoded for LOWER_A64_SYNCHRONOUS - not accurate - remove after")
             # print(f"WA WA WA - assume callback is hardcoded for LOWER_A64_SYNCHRONOUS - not accurate - remove after")
 

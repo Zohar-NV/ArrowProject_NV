@@ -110,6 +110,8 @@ class Memory:
             # to reduce the probability of getting "Aliggnment fault" 
             # TODO:: need to model this better
             self.alignment = choice.choice(values={0:10, 1:30, 2:60})
+        else:
+            self.alignment = alignment
 
         #==================================================
 

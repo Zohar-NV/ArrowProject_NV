@@ -192,7 +192,8 @@ class IngredientManager:
         # executing boot stages
         current_state = state_manager.get_active_state()
         current_code_block = state_manager.get_active_state().current_code_block
-        boot_block = current_state.memory_manager.get_segments(pool_type=Configuration.Memory_types.BOOT_CODE)[0]
+        page_table = current_state.current_el_page_table
+        boot_block = page_table.segment_manager.get_segments(pool_type=Configuration.Memory_types.BOOT_CODE)[0]
 
         have_boot_section = False
         for ing in ingredients:
